@@ -1,0 +1,46 @@
+<webapp-structure>
+  <registeredFiles>
+    <entry>
+      <string>currentBuild</string>
+      <path-set>
+        <pathsSet class="linked-hash-set">
+          <string>WEB-INF/web.xml</string>
+          <string>WEB-INF/classes/db.properties</string>
+          <string>WEB-INF/classes/log4j.properties</string>
+          <string>WEB-INF/classes/org/mix3/tagging/entity/Article.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/entity/ArticleToTag.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/entity/Tag.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/error/ErrorPage.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/error/ErrorPage.html</string>
+          <string>WEB-INF/classes/org/mix3/tagging/error/ErrorRequestCycle.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/HomePage.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/HomePage.html</string>
+          <string>WEB-INF/classes/org/mix3/tagging/model/ArticleModel.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/model/TagModel.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/FindPage$1.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/FindPage.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/FindPage.html</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/PostPage.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/PostPage.html</string>
+          <string>WEB-INF/classes/org/mix3/tagging/page/SearchPage.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/service/H2DatabaseProvider.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/service/Service.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/service/ServiceImpl$1.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/service/ServiceImpl.class</string>
+          <string>WEB-INF/classes/org/mix3/tagging/WicketApplication.class</string>
+          <string>WEB-INF/lib/wicket-1.4-rc2.jar</string>
+          <string>WEB-INF/lib/slf4j-api-1.4.2.jar</string>
+          <string>WEB-INF/lib/slf4j-log4j12-1.4.2.jar</string>
+          <string>WEB-INF/lib/log4j-1.2.14.jar</string>
+          <string>WEB-INF/lib/activeobjects-0.8.2.jar</string>
+          <string>WEB-INF/lib/ant-1.6.5.jar</string>
+          <string>WEB-INF/lib/h2database-1.1.103.jar</string>
+          <string>WEB-INF/lib/wicket-guice-1.4-rc2.jar</string>
+          <string>WEB-INF/lib/wicket-ioc-1.4-rc2.jar</string>
+          <string>WEB-INF/lib/cglib-nodep-2.1_3.jar</string>
+          <string>WEB-INF/lib/guice-1.0.jar</string>
+        </pathsSet>
+      </path-set>
+    </entry>
+  </registeredFiles>
+</webapp-structure>

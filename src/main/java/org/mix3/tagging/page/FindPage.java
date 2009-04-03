@@ -12,12 +12,13 @@ import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.link.ExternalLink;
 import org.apache.wicket.markup.html.list.ListItem;
 import org.apache.wicket.markup.html.list.ListView;
+import org.mix3.tagging.auth.AuthenticatedWebPage;
 import org.mix3.tagging.model.TagModel;
 import org.mix3.tagging.service.Service;
 
 import com.google.inject.Inject;
 
-public class FindPage extends WebPage{
+public class FindPage extends AuthenticatedWebPage{
 	@Inject
 	protected Service service;
 	
@@ -30,7 +31,8 @@ public class FindPage extends WebPage{
 		}else{
 			throw new RuntimeErrorException(new Error("Parameters Empty Error"), "Parameters Empty Error");
 		}
-		final String serverurl = service.getSettings().getUrl();
+		final String serverurl = service.getSetting().getUrl();
+//		final String serverurl = "http://192.1568.24.97:8080/";
 		try {
 			add(new ListView<TagModel>("tag", service.findArticleToTag(url)){
 				@Override

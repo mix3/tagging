@@ -1,7 +1,6 @@
 package org.mix3.tagging.service;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -17,14 +16,15 @@ import net.java.ao.EntityManager;
 import net.java.ao.Query;
 import net.java.ao.Transaction;
 
-import org.mix3.tagging.WicketApplication;
 import org.mix3.tagging.entity.Article;
 import org.mix3.tagging.entity.ArticleToTag;
-import org.mix3.tagging.entity.Settings;
+import org.mix3.tagging.entity.Setting;
 import org.mix3.tagging.entity.Tag;
 import org.mix3.tagging.model.ArticleModel;
 import org.mix3.tagging.model.SettingModel;
 import org.mix3.tagging.model.TagModel;
+import org.mix3.tagging.utils.H2DatabaseProvider;
+import org.mix3.tagging.utils.Utils;
 
 import com.google.inject.Singleton;
 
@@ -32,8 +32,9 @@ import com.google.inject.Singleton;
 public class ServiceImpl implements Service{
 	private EntityManager em;
 	
-	private ServiceImpl() throws SQLException{
-		Properties dbProperties = getDBProperties();
+	@SuppressWarnings("unchecked")
+	public ServiceImpl() throws SQLException, NoSuchAlgorithmException{
+		Properties dbProperties = Utils.getDBProperties();
 		String uri = dbProperties.getProperty("db.uri");
 		String username = dbProperties.getProperty("db.username");
 		String password = dbProperties.getProperty("db.password");
@@ -41,13 +42,16 @@ public class ServiceImpl implements Service{
 		em = new EntityManager(new H2DatabaseProvider(uri, username, password));
 		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
 		
-		em.migrate(Settings.class, Article.class, Tag.class, ArticleToTag.class);
-		Settings settings = em.create(Settings.class, new DBParam[]{
-			new DBParam("url", "http://localhost:8080/")
+		em.migrate(Article.class, Tag.class, ArticleToTag.class, Setting.class);
+		Setting settings = em.create(Setting.class, new DBParam[]{
+			new DBParam("url", "http://192.168.24.97:8080/"),
+			new DBParam("userid", "admin"),
+			new DBParam("password", Utils.digest("password"))
 		});
 		settings.save();
 	}
 	
+	/*
 	private Properties getDBProperties() {
 		Properties back = new Properties();
 		InputStream is = WicketApplication.class.getResourceAsStream("/db.properties");
@@ -62,8 +66,9 @@ public class ServiceImpl implements Service{
 		}
 		return back;
 	}
+	*/
 
-	public void createArticle(final String title, final String excerpt, final String url, final String tag) throws SQLException {
+	public List<TagModel> createArticle(final String title, final String excerpt, final String url, final String tag) throws SQLException {
 		new Transaction<Object>(em){
 			@Override
 			protected Object run() throws SQLException {
@@ -71,6 +76,10 @@ public class ServiceImpl implements Service{
 				List<Tag> tagList = new ArrayList<Tag>();
 				String[] tags = tag.replaceAll("　", " ").split(" ");
 				for(String t : tags){
+					if(t.equals("")){
+						continue;
+					}
+					System.out.println("tag -> "+t);
 					Tag[] findTags = em.find(Tag.class, Query.select().where("name like ?", t));
 					if(findTags.length > 0){
 						tagList.add(findTags[0]);
@@ -129,6 +138,7 @@ public class ServiceImpl implements Service{
 				return null;
 			}
 		}.execute();
+		return findArticleToTag(url);
 	}
 
 	public List<TagModel> findArticleToTag(String url) throws SQLException {
@@ -157,7 +167,7 @@ public class ServiceImpl implements Service{
 		return articleList;
 	}
 
-	public SettingModel getSettings() throws SQLException {
-		return new SettingModel(em.get(Settings.class, 1));
+	public SettingModel getSetting() throws SQLException {
+		return new SettingModel(em.get(Setting.class, 1));
 	}
 }

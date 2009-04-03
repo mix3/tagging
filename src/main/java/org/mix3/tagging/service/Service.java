@@ -12,9 +12,9 @@ import com.google.inject.ImplementedBy;
 
 @ImplementedBy(ServiceImpl.class)
 public interface Service {
-	public void createArticle(String title, String excerpt, String url, String tag) throws SQLException;
+	public List<TagModel> createArticle(String title, String excerpt, String url, String tag) throws SQLException;
 	public List<TagModel> findArticleToTag(String url) throws SQLException;
 	public List<ArticleModel> findTagToArticle(int tag) throws SQLException;
-	public SettingModel getSettings() throws SQLException;
+	public SettingModel getSetting() throws SQLException;
 	public List<ArticleModel> searchArticle(String url) throws SQLException;
 }

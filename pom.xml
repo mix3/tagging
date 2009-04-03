@@ -77,9 +77,9 @@
 			<version>0.8.2</version>
 		</dependency>
 		<dependency>
-			<groupId>org.h2database</groupId>
-			<artifactId>h2database</artifactId>
-			<version>1.1.103</version>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.1.108</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.wicket</groupId>

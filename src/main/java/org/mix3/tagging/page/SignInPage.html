@@ -1,0 +1,27 @@
+<html>
+<body>
+<form wicket:id="loginForm">
+	<table>
+		<tr>
+			<td align="right">Username:</td>
+			<td><input wicket:id="id" type="text" size="50"/></td>
+		</tr>
+		<tr>
+			<td align="right">Password:</td>
+			<td><input wicket:id="pass" type="password" size="50"/></td>
+		</tr>
+		<tr>
+			<td align="right">Auto Login:</td>
+			<td><input type="checkbox" name="skip" wicket:id="skip" /></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<input type="submit" name="submit" value="Login" wicket:id="submit"/>
+				<input type="reset" value="Reset"/>
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.mix3.tagging.entity.Tag;
 
+@SuppressWarnings("serial")
 public class TagModel implements Serializable{
 	private Integer id;
 	private String name;

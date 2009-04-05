@@ -1,51 +1,34 @@
 package org.mix3.tagging;
 
+import org.apache.wicket.Page;
 import org.apache.wicket.Request;
 import org.apache.wicket.RequestCycle;
 import org.apache.wicket.Response;
-import org.apache.wicket.Session;
+import org.apache.wicket.authentication.AuthenticatedWebApplication;
+import org.apache.wicket.authentication.AuthenticatedWebSession;
 import org.apache.wicket.guice.GuiceComponentInjector;
-import org.apache.wicket.protocol.http.WebApplication;
+import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.protocol.http.WebRequest;
 import org.apache.wicket.protocol.http.WebResponse;
-import org.apache.wicket.request.target.coding.MixedParamUrlCodingStrategy;
 import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.IExceptionSettings;
-import org.mix3.tagging.auth.MyAuthorizationStrategy;
-import org.mix3.tagging.auth.MySession;
+import org.mix3.tagging.auth.MyAuthenticatedWebSession;
 import org.mix3.tagging.auth.page.ManagePage;
 import org.mix3.tagging.error.ErrorPage;
 import org.mix3.tagging.error.ErrorRequestCycle;
-import org.mix3.tagging.page.ArchivesPage;
-import org.mix3.tagging.page.FindPage;
 import org.mix3.tagging.page.PostPage;
 import org.mix3.tagging.page.SignInPage;
-import org.mix3.tagging.service.Service;
-import org.mix3.tagging.service.ServiceImpl;
 
-import com.google.inject.Binder;
-import com.google.inject.Module;
-import com.google.inject.Singleton;
-
-public class WicketApplication extends WebApplication{
-	@Override
-	public Session newSession(Request request, org.apache.wicket.Response response) {
-		return new MySession(request);
-	}
-	
-	@Override
-	public RequestCycle newRequestCycle(Request request, Response response) {
-		return new ErrorRequestCycle(this, (WebRequest)request, (WebResponse)response);
-	}
-	
+public class WicketApplication extends AuthenticatedWebApplication{
 	@Override
 	protected void init() {
+		super.init();
+		
 		// Guice Setting
-		addComponentInstantiationListener(new GuiceComponentInjector(this, getModule()));
+		addComponentInstantiationListener(new GuiceComponentInjector(this));
 		
 		// Wicket Setting
 		getMarkupSettings().setStripWicketTags(true);
-		getSecuritySettings().setAuthorizationStrategy(new MyAuthorizationStrategy());
 		
 		// Encode Setting
 		getRequestCycleSettings().setResponseRequestEncoding("UTF-8");
@@ -53,8 +36,8 @@ public class WicketApplication extends WebApplication{
 		
 		// Mount Setting
 		mount(new QueryStringUrlCodingStrategy("/post", PostPage.class));
-		mount(new QueryStringUrlCodingStrategy("/find", FindPage.class));
-		mount(new MixedParamUrlCodingStrategy("/archives", ArchivesPage.class, new String[]{"id"}));
+//		mount(new QueryStringUrlCodingStrategy("/find", FindPage.class));
+//		mount(new MixedParamUrlCodingStrategy("/archives", ArchivesPage.class, new String[]{"id"}));
 		mountBookmarkablePage("/signin", SignInPage.class);
 		mountBookmarkablePage("/manage", ManagePage.class);
 		
@@ -65,15 +48,23 @@ public class WicketApplication extends WebApplication{
 	
 	public WicketApplication(){}
 	
-	public Class<FindPage> getHomePage(){
-		return FindPage.class;
+	@Override
+	protected Class<? extends WebPage> getSignInPageClass() {
+		return SignInPage.class;
+	}
+
+	@Override
+	protected Class<? extends AuthenticatedWebSession> getWebSessionClass() {
+		return MyAuthenticatedWebSession.class;
+	}
+
+	@Override
+	public Class<? extends Page> getHomePage() {
+		return SignInPage.class;
 	}
 	
-	private Module getModule() {
-		return new Module() {
-			public void configure(Binder binder) {
-				binder.bind(Service.class).to(ServiceImpl.class).in(Singleton.class);
-			}
-		};
+	@Override
+	public RequestCycle newRequestCycle(Request request, Response response) {
+		return new ErrorRequestCycle(this, (WebRequest)request, (WebResponse)response);
 	}
 }

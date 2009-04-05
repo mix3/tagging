@@ -7,11 +7,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Properties;
 
 import org.mix3.tagging.WicketApplication;
 
 public class Utils {
+	public final static String RANDOM_ALGORITHM = "SHA1PRNG";
+	public final static int    RANDOM_LENGTH    = 24;
+	
 	public static Properties getDBProperties(){
 		Properties back = new Properties();
 		InputStream is = WicketApplication.class.getResourceAsStream("/db.properties");
@@ -61,5 +65,14 @@ public class Utils {
             }
         }
         return b.toByteArray();
+    }
+    
+    public static byte[] getRandom() throws NoSuchAlgorithmException {
+    	SecureRandom random = SecureRandom.getInstance(RANDOM_ALGORITHM);
+    	byte seed[] = random.generateSeed(RANDOM_LENGTH);
+    	byte b[] = new byte[RANDOM_LENGTH];
+    	random.setSeed(seed);
+    	random.nextBytes(b);
+    	return b;
     }
 }

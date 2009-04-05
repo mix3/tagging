@@ -1,9 +1,14 @@
 package org.mix3.tagging.error;
 
-import org.apache.wicket.markup.html.WebPage;
+import org.mix3.tagging.frame.Result;
 
-public class ErrorPage extends WebPage{
+public class ErrorPage extends Result{
 	public ErrorPage(RuntimeException e){
-		//System.out.println(e.getCause().getCause().getMessage());
+		System.out.println("Error:"+e.getCause().getCause().getMessage());
+	}
+
+	@Override
+	protected String Message() {
+		return "Error";
 	}
 } 

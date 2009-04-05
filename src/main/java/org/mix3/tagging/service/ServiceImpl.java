@@ -9,19 +9,17 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.management.RuntimeErrorException;
-
 import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
 import net.java.ao.Query;
 import net.java.ao.Transaction;
 
-import org.mix3.tagging.entity.Article;
-import org.mix3.tagging.entity.ArticleToTag;
+import org.mix3.tagging.entity.Post;
+import org.mix3.tagging.entity.PostToTag;
 import org.mix3.tagging.entity.Setting;
 import org.mix3.tagging.entity.Tag;
-import org.mix3.tagging.model.ArticleModel;
-import org.mix3.tagging.model.SettingModel;
+import org.mix3.tagging.entity.User;
+import org.mix3.tagging.entity.UserToPost;
 import org.mix3.tagging.model.TagModel;
 import org.mix3.tagging.utils.H2DatabaseProvider;
 import org.mix3.tagging.utils.Utils;
@@ -42,117 +40,137 @@ public class ServiceImpl implements Service{
 		em = new EntityManager(new H2DatabaseProvider(uri, username, password));
 		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
 		
-		em.migrate(Article.class, Tag.class, ArticleToTag.class, Setting.class);
-		Setting settings = em.create(Setting.class, new DBParam[]{
-			new DBParam("url", "http://192.168.24.97:8080/"),
-			new DBParam("userid", "admin"),
-			new DBParam("password", Utils.digest("password"))
-		});
-		settings.save();
+		em.migrate(User.class, Post.class, UserToPost.class, Tag.class, PostToTag.class, Setting.class);
+		if(em.count(Setting.class) == 0){
+			em.create(Setting.class, new DBParam[]{
+				new DBParam("url", "http://localhost:8080/")
+			}).save();
+			em.create(User.class, new DBParam[]{
+				new DBParam("userid", "admin"),
+				new DBParam("password", "password"),
+				new DBParam("token", Utils.getRandom())
+			}).save();
+		}
+		User admin = em.get(User.class, 1);
+		System.out.println("UID  :"+admin.getUserId());
+		System.out.println("PASS :"+admin.getPassword());
+		System.out.println("TOKEN:"+admin.getToken());
+	}
+
+	public boolean signIn(String userId, String password) throws SQLException {
+//		if(false){
+//			throw new SQLException("debug");
+//		}
+		User[] user = em.find(User.class);
+		for(User u : user){
+			if(u.getUserId().equals(userId) && u.getPassword().equals(password)){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public String getAdmin() {
+		return em.get(User.class, 1).getUserId();
 	}
 	
-	/*
-	private Properties getDBProperties() {
-		Properties back = new Properties();
-		InputStream is = WicketApplication.class.getResourceAsStream("/db.properties");
-		if (is == null) {
-			throw new RuntimeException("Unable to locate db.properties");
+	public List<TagModel> createPost(String token, final String title, final String excerpt, final String url, final String tag) throws SQLException {
+		if(true){
+			token = em.get(User.class, 1).getToken();
 		}
-		try {
-			back.load(is);
-			is.close();
-		} catch (IOException e) {
-			throw new RuntimeException("Unable to load db.properties");
+		final User[] user = em.find(User.class, Query.select().where("token like ?", token));
+		if(user.length == 0){
+			throw new SQLException();
 		}
-		return back;
-	}
-	*/
-
-	public List<TagModel> createArticle(final String title, final String excerpt, final String url, final String tag) throws SQLException {
 		new Transaction<Object>(em){
 			@Override
 			protected Object run() throws SQLException {
 				//Tagの登録 
 				List<Tag> tagList = new ArrayList<Tag>();
-				String[] tags = tag.replaceAll("　", " ").split(" ");
-				for(String t : tags){
-					if(t.equals("")){
-						continue;
-					}
-					System.out.println("tag -> "+t);
-					Tag[] findTags = em.find(Tag.class, Query.select().where("name like ?", t));
-					if(findTags.length > 0){
-						tagList.add(findTags[0]);
-					}else{
-						Tag createTag = em.create(Tag.class, new DBParam[]{
-							new DBParam("name", t)
-						});
-						createTag.save();
-						tagList.add(createTag);
+				String[] tags = tag.replaceAll("[　|\n|\r|\t]+", " ").split(" ");
+				
+				if(tags.length > 0 && !tags[0].equals("")){
+					for(String t : tags){
+						System.out.println("tag -> "+t);
+						Tag[] findTags = em.find(Tag.class, Query.select().where("name like ?", t));
+						if(findTags.length > 0){
+							tagList.add(findTags[0]);
+						}else{
+							Tag createTag = em.create(Tag.class, new DBParam[]{
+								new DBParam("name", t)
+							});
+							createTag.save();
+							tagList.add(createTag);
+						}
 					}
 				}
 				
-				// Articleの登録
-				Article[] findArticles = em.find(Article.class, Query.select().where("url like ?", url));
-				Article updateArticle;
-				if(findArticles.length > 0){
+				// Postの登録
+				Post[] findPosts = em.find(Post.class, Query.select().where("url like ?", url));
+				Post updatePost;
+				if(findPosts.length > 0){
 					// 既に登録されている場合は、関連付けられているタグとの関連を抹殺
-					em.delete(em.find(ArticleToTag.class, Query.select().where("articleID=?", findArticles[0].getID())));
+					em.delete(em.find(PostToTag.class, Query.select().where("postID=?", findPosts[0].getID())));
 					
 					// アップデート
-					findArticles[0].setTitle(title);
-					findArticles[0].setExcerpt(excerpt);
-					findArticles[0].setUrl(url);
-					findArticles[0].setDate(new Timestamp(System.currentTimeMillis()));
-					findArticles[0].save();
-					updateArticle = findArticles[0];
+					findPosts[0].setTitle(title);
+					findPosts[0].setExcerpt(excerpt);
+					findPosts[0].setUrl(url);
+					findPosts[0].setDate(new Timestamp(System.currentTimeMillis()));
+					findPosts[0].save();
+					updatePost = findPosts[0];
 				}else{
 					// 新規作成
-					updateArticle = em.create(Article.class, new DBParam[]{
+					updatePost = em.create(Post.class, new DBParam[]{
 						new DBParam("title", title),
 						new DBParam("excerpt", excerpt),
 						new DBParam("url", url),
 						new DBParam("date", new Timestamp(System.currentTimeMillis()))
 					});
-					updateArticle.save();
+					updatePost.save();
+					
+					// User と Post の関連を作る
+					em.create(UserToPost.class, new DBParam[]{
+						new DBParam("userId", user[0].getID()),
+						new DBParam("postId", updatePost.getID())
+					}).save();
 				}
 				
-				// Article と Tagの間に関連を作る
+				// Post と Tagの間に関連を作る
 				for(Tag related : tagList){
-					ArticleToTag att = em.create(ArticleToTag.class, new DBParam[]{
-						new DBParam("articleID", updateArticle.getID()),
+					PostToTag att = em.create(PostToTag.class, new DBParam[]{
+						new DBParam("postID", updatePost.getID()),
 						new DBParam("tagID", related.getID())
 					});
 					att.save();
 				}
 				
-				System.out.println("Article");
-				System.out.println("\ttitle : "+updateArticle.getTitle());
-				System.out.println("\texcerpt : "+updateArticle.getExcerpt());
-				System.out.println("\tURL : "+updateArticle.getUrl());
-				System.out.println("\tDate : "+updateArticle.getDate());
+				System.out.println("Post");
+				System.out.println("\ttitle : "+updatePost.getTitle());
+				System.out.println("\texcerpt : "+updatePost.getExcerpt());
+				System.out.println("\tURL : "+updatePost.getUrl());
+				System.out.println("\tDate : "+updatePost.getDate());
 				System.out.println("Tag");
-				for(Tag related : updateArticle.getTags()){
+				for(Tag related : updatePost.getTags()){
 					System.out.println("\tname : "+related.getName());
 				}
 				return null;
 			}
 		}.execute();
-		return findArticleToTag(url);
+		return findPostToTag(url);
 	}
-
-	public List<TagModel> findArticleToTag(String url) throws SQLException {
-		Article[] article = em.find(Article.class, Query.select().where("url like ?", url));
+	public List<TagModel> findPostToTag(String url) throws SQLException {
+		Post[] post = em.find(Post.class, Query.select().where("url like ?", url));
 		List<TagModel> tagList = new ArrayList<TagModel>();
-		if(article.length > 0){
-			for(Tag tag : article[0].getTags()){
+		if(post.length > 0){
+			for(Tag tag : post[0].getTags()){
 				tagList.add(new TagModel(tag));
 			}
-		}else{
-			throw new RuntimeErrorException(new Error("SQLException Error"), "SQLException Error");
 		}
 		return tagList;
 	}
+	
+	/*
 	public List<ArticleModel> searchArticle(String url) throws SQLException {
 		// TODO 自動生成されたメソッド・スタブ
 		return null;
@@ -170,4 +188,10 @@ public class ServiceImpl implements Service{
 	public SettingModel getSetting() throws SQLException {
 		return new SettingModel(em.get(Setting.class, 1));
 	}
+
+	public Map<String, String> signIn(String userId, String password) {
+		// TODO 自動生成されたメソッド・スタブ
+		return null;
+	}
+	*/
 }

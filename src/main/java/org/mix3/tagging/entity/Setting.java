@@ -9,12 +9,4 @@ public interface Setting extends Entity{
 	@SQLType(Types.CLOB)
 	public String getUrl();
 	public void setUrl(String url);
-	
-	@SQLType(Types.CLOB)
-	public String getUserId();
-	public void setUserId(String userid);
-	
-	@SQLType(Types.CLOB)
-	public String getPassword();
-	public void setPassword(String password);
 }

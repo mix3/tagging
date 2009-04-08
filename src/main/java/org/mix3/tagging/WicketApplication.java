@@ -13,7 +13,9 @@ import org.apache.wicket.protocol.http.WebResponse;
 import org.apache.wicket.request.target.coding.QueryStringUrlCodingStrategy;
 import org.apache.wicket.settings.IExceptionSettings;
 import org.mix3.tagging.auth.MyAuthenticatedWebSession;
+import org.mix3.tagging.auth.page.LogoutPage;
 import org.mix3.tagging.auth.page.ManagePage;
+import org.mix3.tagging.auth.page.SettingPage;
 import org.mix3.tagging.error.ErrorPage;
 import org.mix3.tagging.error.ErrorRequestCycle;
 import org.mix3.tagging.page.PostPage;
@@ -40,10 +42,12 @@ public class WicketApplication extends AuthenticatedWebApplication{
 //		mount(new MixedParamUrlCodingStrategy("/archives", ArchivesPage.class, new String[]{"id"}));
 		mountBookmarkablePage("/signin", SignInPage.class);
 		mountBookmarkablePage("/manage", ManagePage.class);
+		mountBookmarkablePage("/setting", SettingPage.class);
+		mountBookmarkablePage("/logout", LogoutPage.class);
 		
 		// Error Page Setting
-		getApplicationSettings().setInternalErrorPage(ErrorPage.class);
-		getExceptionSettings().setUnexpectedExceptionDisplay(IExceptionSettings.SHOW_INTERNAL_ERROR_PAGE);
+//		getApplicationSettings().setInternalErrorPage(ErrorPage.class);
+//		getExceptionSettings().setUnexpectedExceptionDisplay(IExceptionSettings.SHOW_INTERNAL_ERROR_PAGE);
 	}
 	
 	public WicketApplication(){}
@@ -63,8 +67,8 @@ public class WicketApplication extends AuthenticatedWebApplication{
 		return SignInPage.class;
 	}
 	
-	@Override
-	public RequestCycle newRequestCycle(Request request, Response response) {
-		return new ErrorRequestCycle(this, (WebRequest)request, (WebResponse)response);
-	}
+//	@Override
+//	public RequestCycle newRequestCycle(Request request, Response response) {
+//		return new ErrorRequestCycle(this, (WebRequest)request, (WebResponse)response);
+//	}
 }

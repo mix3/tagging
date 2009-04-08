@@ -25,6 +25,7 @@ public class MyAuthenticatedWebSession extends AuthenticatedWebSession{
 	
 	@Override
 	public boolean authenticate(String userid, String password) {
+		System.out.println("check : "+userid+" : "+password);
 		if (this.userName == null) {
 			try {
 				if(service.signIn(userid, password)){
@@ -40,11 +41,21 @@ public class MyAuthenticatedWebSession extends AuthenticatedWebSession{
 	@Override
 	public Roles getRoles() {
 		if (isSignedIn()) {
+			System.out.println("role check");
 			if (service.getAdmin().equals(this.userName)) {
+				System.out.println("admin : "+service.getAdmin()+" = "+this.userName);
 				return new Roles(Roles.ADMIN);
 			}
+			System.out.println("guest : "+service.getAdmin()+" = "+this.userName);
 			return new Roles(Roles.USER);
 		}
 		return null;
+	}
+	
+	@Override
+	public void signOut() {
+		super.signOut();
+		System.out.println("signout");
+		this.userName = null;
 	}
 }

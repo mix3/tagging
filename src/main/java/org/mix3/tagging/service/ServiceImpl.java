@@ -13,6 +13,8 @@ import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
 import net.java.ao.Query;
 import net.java.ao.Transaction;
+import net.java.ao.db.C3P0PoolProvider;
+import net.java.ao.db.H2DatabaseProvider;
 
 import org.mix3.tagging.entity.Post;
 import org.mix3.tagging.entity.PostToTag;
@@ -20,8 +22,8 @@ import org.mix3.tagging.entity.Setting;
 import org.mix3.tagging.entity.Tag;
 import org.mix3.tagging.entity.User;
 import org.mix3.tagging.entity.UserToPost;
+import org.mix3.tagging.model.SettingModel;
 import org.mix3.tagging.model.TagModel;
-import org.mix3.tagging.utils.H2DatabaseProvider;
 import org.mix3.tagging.utils.Utils;
 
 import com.google.inject.Singleton;
@@ -37,7 +39,7 @@ public class ServiceImpl implements Service{
 		String username = dbProperties.getProperty("db.username");
 		String password = dbProperties.getProperty("db.password");
 		
-		em = new EntityManager(new H2DatabaseProvider(uri, username, password));
+		em = new EntityManager(new C3P0PoolProvider(new H2DatabaseProvider(uri, username, password)));
 		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
 		
 		em.migrate(User.class, Post.class, UserToPost.class, Tag.class, PostToTag.class, Setting.class);
@@ -50,6 +52,11 @@ public class ServiceImpl implements Service{
 				new DBParam("password", "password"),
 				new DBParam("token", Utils.getRandom())
 			}).save();
+			em.create(User.class, new DBParam[]{
+				new DBParam("userid", "guest"),
+				new DBParam("password", "guest"),
+				new DBParam("token", Utils.getRandom())
+			}).save();
 		}
 		User admin = em.get(User.class, 1);
 		System.out.println("UID  :"+admin.getUserId());
@@ -58,20 +65,25 @@ public class ServiceImpl implements Service{
 	}
 
 	public boolean signIn(String userId, String password) throws SQLException {
-//		if(false){
-//			throw new SQLException("debug");
-//		}
-		User[] user = em.find(User.class);
-		for(User u : user){
-			if(u.getUserId().equals(userId) && u.getPassword().equals(password)){
-				return true;
-			}
+		User[] user = em.find(User.class, Query.select().where("userid like ?", userId));
+		if(user.length > 0 && user[0].getPassword().equals(password)){
+			return true;
 		}
 		return false;
 	}
 
 	public String getAdmin() {
 		return em.get(User.class, 1).getUserId();
+	}
+	
+	public SettingModel getSetting() {
+		return new SettingModel(em.get(Setting.class, 1));
+	}
+	
+	public void setSetting(SettingModel settingModel) {
+		Setting setting = em.get(Setting.class, 1);
+		setting.setUrl(settingModel.getUrl());
+		setting.save();
 	}
 	
 	public List<TagModel> createPost(String token, final String title, final String excerpt, final String url, final String tag) throws SQLException {

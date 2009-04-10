@@ -15,6 +15,7 @@ import net.java.ao.DBParam;
 import net.java.ao.EntityManager;
 import net.java.ao.Query;
 import net.java.ao.Transaction;
+import net.java.ao.db.C3P0PoolProvider;
 
 import org.mix3.tagging.entity.Article;
 import org.mix3.tagging.entity.ArticleToTag;
@@ -39,7 +40,7 @@ public class ServiceImpl implements Service{
 		String username = dbProperties.getProperty("db.username");
 		String password = dbProperties.getProperty("db.password");
 		
-		em = new EntityManager(new H2DatabaseProvider(uri, username, password));
+		em = new EntityManager(new C3P0PoolProvider(new H2DatabaseProvider(uri, username, password)));
 		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
 		
 		em.migrate(Article.class, Tag.class, ArticleToTag.class, Setting.class);

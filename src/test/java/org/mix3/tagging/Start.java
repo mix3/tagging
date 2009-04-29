@@ -3,6 +3,7 @@ package org.mix3.tagging;
 import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.security.SslSocketConnector;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 public class Start {
@@ -15,6 +16,17 @@ public class Start {
 		connector.setMaxIdleTime(1000 * 60 * 60);
 		connector.setSoLingerTime(-1);
 		connector.setPort(8080);
+//		
+//		SslSocketConnector sslconnector = new SslSocketConnector();
+//		sslconnector.setMaxIdleTime(1000 * 60 * 60);
+//		sslconnector.setSoLingerTime(-1);
+//		sslconnector.setPort(8081);
+//		sslconnector.setKeystore("\\etc");
+//		sslconnector.setPassword("ms3x4bk3");
+//		sslconnector.setKeyPassword("ms3x4bk3");
+//		sslconnector.setTrustPassword("ms3x4bk3");
+//		sslconnector.setTruststore("\\etc");
+		
 		server.setConnectors(new Connector[] { connector });
 
 		WebAppContext bb = new WebAppContext();

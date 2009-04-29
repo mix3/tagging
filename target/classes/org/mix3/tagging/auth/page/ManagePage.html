@@ -2,5 +2,34 @@
 <body>
 manage
 <a href="#" wicket:id="logout">logout</a>
+<form wicket:id="settingForm">
+	<table>
+		<tr>
+			<td align="right">URL:</td>
+			<td>
+				<input wicket:id="url" type="text" value="foo@goo.moo" size="30"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">UserID:</td>
+			<td>
+				<input wicket:id="userid" type="text" value="foo@goo.moo" size="30"/>
+			</td>
+		</tr>
+		<tr>
+			<td align="right">Password:</td>
+			<td>
+				<input wicket:id="password" type="password" value="foo@goo.moo" size="30"/>
+			</td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>
+				<input type="submit" name="submit" value="Update"/>
+				<input type="reset" value="Reset"/>
+			</td>
+		</tr>
+	</table>
+</form>
 </body>
 </html>

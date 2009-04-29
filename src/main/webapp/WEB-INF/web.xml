@@ -29,6 +29,22 @@
   <filter-name>wicket.tagging</filter-name>
 	<url-pattern>/*</url-pattern>
  </filter-mapping>
-
-
+<!--  
+   <security-constraint>
+      <display-name>SSL</display-name>
+      <web-resource-collection>
+         <web-resource-name>Make sure login path is secured</web-resource-name>
+         <description>We like ssl web services</description>
+         <url-pattern>/signin/*</url-pattern>
+      </web-resource-collection>
+      <web-resource-collection>
+         <web-resource-name>Web Services</web-resource-name>
+         <description>We like ssl web services</description>
+         <url-pattern>/ws/*</url-pattern>
+      </web-resource-collection>
+      <user-data-constraint>
+         <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+      </user-data-constraint>
+   </security-constraint>
+ -->
 </web-app>

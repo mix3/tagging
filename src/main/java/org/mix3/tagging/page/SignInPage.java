@@ -67,11 +67,8 @@ public class SignInPage extends WebPage{
 					String pass = null;
 					Boolean skip = (Boolean)checkBox.getDefaultModelObject();
 					
-					try {
-						pass = Utils.digest(passwordTextField.getDefaultModelObjectAsString());
-					} catch (NoSuchAlgorithmException e) {
-						e.printStackTrace();
-					}
+					//pass = Utils.digest(passwordTextField.getDefaultModelObjectAsString());
+					pass = passwordTextField.getDefaultModelObjectAsString();
 					if(settingModel.getUserId().equals(uid) && settingModel.getPassword().equals(pass)){
 						((MySession)Session.get()).setUserName(uid);
 						getWebRequestCycle().getWebResponse().addCookie(new Cookie("skip", skip.toString()));

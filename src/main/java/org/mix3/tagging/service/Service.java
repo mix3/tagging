@@ -16,5 +16,8 @@ public interface Service {
 	public List<TagModel> findArticleToTag(String url) throws SQLException;
 	public List<ArticleModel> findTagToArticle(int tag) throws SQLException;
 	public SettingModel getSetting() throws SQLException;
+	public void setSetting(SettingModel settingModel) throws SQLException;
 	public List<ArticleModel> searchArticle(String url) throws SQLException;
+	
+	public void testList() throws SQLException;
 }

@@ -14,6 +14,7 @@ public class ArticleModel implements Serializable{
 	private String url;
 	private List<TagModel> tagList;
 	
+	public ArticleModel(){}
 	public ArticleModel(Article article){
 		this.id = article.getID();
 		this.title = article.getTitle();

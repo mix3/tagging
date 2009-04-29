@@ -1,10 +1,18 @@
 package org.mix3.tagging.service;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,15 +49,17 @@ public class ServiceImpl implements Service{
 		String password = dbProperties.getProperty("db.password");
 		
 		em = new EntityManager(new C3P0PoolProvider(new H2DatabaseProvider(uri, username, password)));
-		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
+//		Logger.getLogger("net.java.ao").setLevel(Level.FINE);
 		
 		em.migrate(Article.class, Tag.class, ArticleToTag.class, Setting.class);
-		Setting settings = em.create(Setting.class, new DBParam[]{
-			new DBParam("url", "http://192.168.24.97:8080/"),
-			new DBParam("userid", "admin"),
-			new DBParam("password", Utils.digest("password"))
-		});
-		settings.save();
+		if(em.count(Setting.class) == 0){
+			Setting settings = em.create(Setting.class, new DBParam[]{
+				new DBParam("url", "http://192.168.24.97:8080/"),
+				new DBParam("userid", "admin"),
+				new DBParam("password", Utils.digest("password"))
+			});
+			settings.save();
+		}
 	}
 	
 	/*
@@ -143,14 +153,14 @@ public class ServiceImpl implements Service{
 	}
 
 	public List<TagModel> findArticleToTag(String url) throws SQLException {
-		Article[] article = em.find(Article.class, Query.select().where("url like ?", url));
+		Article[] post = em.find(Article.class, Query.select().where("url like ?", url));
 		List<TagModel> tagList = new ArrayList<TagModel>();
-		if(article.length > 0){
-			for(Tag tag : article[0].getTags()){
+		if(post.length > 0){
+			for(Tag tag : post[0].getTags()){
 				tagList.add(new TagModel(tag));
 			}
 		}else{
-			throw new RuntimeErrorException(new Error("SQLException Error"), "SQLException Error");
+			throw new RuntimeErrorException(new Error("RuntimeErrorException Error"), "RuntimeErrorException Error");
 		}
 		return tagList;
 	}
@@ -160,15 +170,53 @@ public class ServiceImpl implements Service{
 	}
 
 	public List<ArticleModel> findTagToArticle(int id) throws SQLException {
-		ArticleToTag[] articletotag = em.find(ArticleToTag.class, Query.select().where("tagID=?", id));
+		Article[] article = em.find(Article.class, Query.select("article.id").join(ArticleToTag.class, "article.id = articleToTag.articleID").where("articleToTag.tagID=?", id));
+//		ArticleToTag[] articletotag = em.find(ArticleToTag.class, Query.select().where("tagID=?", id));
 		List<ArticleModel> articleList = new ArrayList<ArticleModel>();
-		for(ArticleToTag a : articletotag){
-			articleList.add(new ArticleModel(a.getArticle()));
+		for(Article a : article){
+			ArticleModel articleModel = new ArticleModel();
+			articleModel.setUrl(a.getUrl());
+			articleList.add(articleModel);
 		}
 		return articleList;
 	}
 
 	public SettingModel getSetting() throws SQLException {
 		return new SettingModel(em.get(Setting.class, 1));
+	}
+
+	public void setSetting(SettingModel settingModel) throws SQLException {
+		Setting setting = em.get(Setting.class, 1);
+		setting.setUrl(settingModel.getUrl());
+		setting.setUserId(settingModel.getUserId());
+		setting.setPassword(settingModel.getPassword());
+		setting.save();
+	}
+	
+	public void testList() throws SQLException{
+		BufferedWriter bw;
+		try {
+			bw = new BufferedWriter(
+		          new OutputStreamWriter(
+		                new FileOutputStream("C:\\tagList.txt"),"UTF-8"));
+			Tag[] tagList = em.find(Tag.class);
+			for(Tag tag : tagList){
+				Integer num = tag.getArticles().length;
+				if(num > 10){
+					bw.write(tag.getName()+"("+num+")\n");
+				}
+			}
+			bw.close();
+		} catch (UnsupportedEncodingException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (FileNotFoundException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO 自動生成された catch ブロック
+			e.printStackTrace();
+		}
+
 	}
 }

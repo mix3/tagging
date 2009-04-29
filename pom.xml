@@ -91,6 +91,11 @@
 			<artifactId>c3p0</artifactId>
 			<version>0.9.1.2</version>
 		</dependency>
+		<dependency>
+			<groupId>org.openid4java</groupId>
+			<artifactId>openid4java</artifactId>
+			<version>0.9.3</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<resources>

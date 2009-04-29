@@ -61,6 +61,9 @@ public class WicketApplication extends WebApplication{
 		// Error Page Setting
 		getApplicationSettings().setInternalErrorPage(ErrorPage.class);
 		getExceptionSettings().setUnexpectedExceptionDisplay(IExceptionSettings.SHOW_INTERNAL_ERROR_PAGE);
+		
+		// SSL Setting
+//		getRequestCycleSettings().setRenderStrategy(Settings.ONE_PASS_RENDER);
 	}
 	
 	public WicketApplication(){}
